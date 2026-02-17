@@ -51,6 +51,22 @@ export default function Home() {
     checkOllamaStatus()
   }, [])
 
+  // Check Ollama status and show alert if not running
+  useEffect(() => {
+    const checkOllamaAndAlert = async () => {
+      try {
+        const response = await fetch('http://localhost:11434/api/tags')
+        if (!response.ok) {
+          alert('Please install Ollama from ollama.com to use this app.')
+        }
+      } catch (error) {
+        alert('Please install Ollama from ollama.com to use this app.')
+      }
+    }
+    
+    checkOllamaAndAlert()
+  }, [])
+
   // Update loading message periodically
   useEffect(() => {
     if (!isLoading) return
@@ -200,6 +216,9 @@ export default function Home() {
 
       const data = await response.json();
       console.log('Received data:', data);
+      
+      // Debug: Check if image exists
+      console.log('Image base64 exists:', !!image, 'Length:', image?.length);
       
       // Set new state variables
       setRoastText(data.roast);
@@ -379,58 +398,26 @@ export default function Home() {
       </div>
 
       {/* Results Section */}
-      {showResults && (
-        <div style={{width: '100%', maxWidth: '560px', marginTop: '32px', animation: 'slideUp 0.5s ease'}}>
-          <div style={{
-            background: 'linear-gradient(160deg, #2E2E2E 0%, #222 100%)',
-            border: '1px solid #333',
-            borderRadius: '20px',
-            padding: '32px',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {/* Shimmer line */}
-            <div style={{
-              position: 'absolute',
-              top: 0, left: 0, right: 0,
-              height: '2px',
-              background: 'linear-gradient(90deg, #FF3D00, #FFD600, #FF3D00)',
-              backgroundSize: '200% 100%',
-              animation: 'shimmer 2s linear infinite'
-            }} />
-            
-            <div style={{fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#FF3D00', marginBottom: '16px', fontWeight: 600}}>
-              🔥 Your Room Has Been Roasted
-            </div>
-            
-            <div style={{fontSize: '17px', lineHeight: 1.75, color: '#E8E0D0', fontWeight: 300}}>
-              {roastText}
-            </div>
+      {roastText && (
+        <div style={{width: '100%', maxWidth: '560px', marginTop: '40px', border: '2px solid red'}}>
+          {/* DEBUG: If you see red border, code is working */}
+          
+          {/* Image */}
+          <div style={{marginBottom: '20px', borderRadius: '16px', overflow: 'hidden'}}>
+            <img src={image || ''} alt="Room" style={{width: '100%', maxHeight: '300px', objectFit: 'cover'}} />
+          </div>
+          
+          {/* Roast */}
+          <div style={{background: '#2E2E2E', padding: '24px', borderRadius: '16px'}}>
+            <div style={{color: '#FF3D00', fontSize: '12px', marginBottom: '12px'}}>🔥 YOUR ROAST</div>
+            <div style={{color: 'white', fontSize: '16px', lineHeight: 1.6}}>{roastText}</div>
             
             {/* Scores */}
-            <div style={{display: 'flex', gap: '10px', marginTop: '24px', flexWrap: 'wrap'}}>
-              {scores.map((score, i) => (
-                <div key={i} style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid #333',
-                  borderRadius: '10px',
-                  padding: '10px 14px',
-                  flex: 1,
-                  minWidth: '90px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#555', marginBottom: '4px'}}>
-                    {score.label}
-                  </div>
-                  <div style={{
-                    fontFamily: 'Bebas Neue, sans-serif',
-                    fontSize: '26px',
-                    background: 'linear-gradient(135deg, #FFD600, #FF3D00)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
-                    {score.value}/10
-                  </div>
+            <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+              {scores.map((s, i) => (
+                <div key={i} style={{flex: 1, textAlign: 'center', background: '#1A1A1A', padding: '12px', borderRadius: '8px'}}>
+                  <div style={{fontSize: '10px', color: '#666'}}>{s.label}</div>
+                  <div style={{fontSize: '24px', color: '#FF3D00'}}>{s.value}/10</div>
                 </div>
               ))}
             </div>
